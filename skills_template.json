@@ -1,0 +1,178 @@
+{
+  "pre_trade_checklist": {
+    "thesis": "Μία πρόταση: γιατί αυτό το trade (π.χ. breakout + catalyst, on-chain accumulation, undervalued vs FDV).",
+    "setup_type": ["breakout", "pullback", "reversal", "event_driven", "on_chain_signal", "arbitrage"],
+    "timeframe": "π.χ. 4h/1d για swing, 15m/1h για intraday",
+    "entry_plan": {
+      "entry_price": "τιμή ή ζώνη εισόδου",
+      "entry_method": ["limit", "market", "TWAP_clip"],
+      "scale_in": "π.χ. 40/30/30 σε 3 επίπεδα"
+    },
+    "invalidation": {
+      "stop_price": "τιμή που ακυρώνει το setup",
+      "stop_type": ["structure", "ATR", "percent"],
+      "stop_distance_pct": "υπολογίζεται από entry και stop"
+    },
+    "risk_params": {
+      "account_equity": "συνολικό κεφάλαιο",
+      "risk_per_trade_pct": "0.5–1% (αρχή)",
+      "max_portfolio_heat_pct": "5–6% συνολικό ανοιχτό ρίσκο"
+    },
+    "targets": {
+      "T1": "π.χ. 1R",
+      "T2": "π.χ. 2R",
+      "T3": "π.χ. 3R+ ή trailing"
+    },
+    "catalysts": ["listing", "mainnet", "token_unlock", "partnership", "governance_vote"],
+    "news_check": {
+      "headline_confirmed": true,
+      "timestamp_fresh": true,
+      "scope": ["single_token", "sector", "BTC", "broad_risk"],
+      "price_already_moved": "Ναι/Όχι + πόσο (%)"
+    },
+    "on_chain_check": {
+      "smart_money_flow": "in/out/neutral",
+      "volume_24h_vs_7d": "up/down/same",
+      "holder_concentration_risk": "high/med/low"
+    },
+    "execution_notes": "slippage, fees, funding rates, liquidity",
+    "discipline_flag": "Ακολούθησες το πλάνο; (Y/N)"
+  },
+  "position_size_calculator": {
+    "formulas": {
+      "stop_distance_pct": "abs(entry - stop) / entry",
+      "risk_amount": "account_equity * (risk_per_trade_pct / 100)",
+      "position_size_units": "risk_amount / (entry - stop)",
+      "notional_exposure": "position_size_units * entry",
+      "R_multiple_realized": "(exit_price - entry) / (entry - stop) για long (αντίστροφο για short)"
+    },
+    "example_long": {
+      "account_equity": 1000,
+      "risk_per_trade_pct": 1,
+      "entry": 1.0,
+      "stop": 0.9,
+      "target": 1.2,
+      "computed": {
+        "stop_distance_pct": 0.1,
+        "risk_amount": 10,
+        "position_size_units": 100,
+        "notional_exposure": 100,
+        "R_planned": 2.0,
+        "PnL_if_target": 20
+      }
+    },
+    "notes": [
+      "Υπολόγισε πάντα το μέγεθος θέσης ΠΡΙΝ την είσοδο.",
+      "Χρησιμοποίησε ATR ή structure για το stop, όχι αυθαίρετο ποσοστό.",
+      "Σε υψηλή μεταβλητότητα, μείωσε το risk_per_trade_pct (π.χ. 0.5%).",
+      "Λέβερατζ δεν μειώνει το price risk – απλώς αλλάζει margin."
+    ]
+  },
+  "news_impact_estimator": {
+    "idea": "Δίνεις headline + context → εκτιμάς surprise, scope, sentiment → παράγεις expected move (%) και sizing adjustment.",
+    "inputs": {
+      "headline": "π.χ. 'Major CEX lists TOKEN με ζεύγη USDT/BTC'",
+      "coin": "TOKEN",
+      "market_cap_rank": 120,
+      "pre_move_pct_1h": 5.2,
+      "historical_similar_events": [
+        {"event": "listing_top5_CEX", "avg_1h_move_pct": 8, "avg_4h_move_pct": 12},
+        {"event": "mid_tier_listing", "avg_1h_move_pct": 4, "avg_4h_move_pct": 6}
+      ],
+      "sentiment_score": 0.8,
+      "surprise_score": 0.7,
+      "scope": "single_token"
+    },
+    "scoring": {
+      "attention": "αριθμός headlines στο παράθυρο (π.χ. 15 λεπτά)",
+      "news_pressure": "recency-weighted sum impact scores (0–1)",
+      "expected_move_1h_pct": "βάσει historical similar events + pre_move + sentiment/surprise",
+      "sizing_adjustment": "αν news_pressure > 0.7 και pre_move < 50% του expected → full size; αλλιώς μείωση 30–50%"
+    },
+    "rules_of_thumb": [
+      "Αν η τιμή έχει ήδη κάνει >70% του ιστορικού μέσου move, θεώρησε mean-reversion risk.",
+      "Product launches / listings συχνά 'buy the rumor, sell the news' → προτίμησε early entry ή wait για pullback.",
+      "Χρησιμοποίησε το news score για να filtrάρεις sizing, όχι για να ανοίγεις τυφλά positions."
+    ]
+  },
+  "trade_journal_schema": {
+    "fields_per_trade": [
+      "trade_id", "date_open", "date_close", "symbol", "direction", "setup_type",
+      "entry_price", "stop_price", "target_price", "exit_price",
+      "position_size_units", "notional_exposure", "risk_per_trade_pct", "account_equity_at_entry",
+      "PnL_usd", "PnL_pct", "R_planned", "R_realized",
+      "fees_usd", "funding_usd", "slippage_estimate_pct",
+      "catalysts_present", "news_pressure_score", "on_chain_signal", "discipline_flag", "notes"
+    ],
+    "metrics_dashboard": [
+      "win_rate", "avg_R_win", "avg_R_loss",
+      "expectancy_R = win_rate*avg_R_win - (1-win_rate)*avg_R_loss",
+      "profit_factor = gross_wins / gross_losses",
+      "max_drawdown_pct", "avg_hold_time", "discipline_rate"
+    ],
+    "reviews": [
+      "Εβδομαδιαίο review: ποια setups έχουν θετικό expectancy;",
+      "Μηνιαίο review: πού χάνεις (execution, sizing, επιλογή setups);",
+      "Αναπροσαρμογή κανόνων βάσει δεδομένων, όχι συναισθήματος."
+    ]
+  },
+  "on_chain_alerts": {
+    "wallets_to_watch": [
+      "smart_money_addresses (Nansen/Arkham labels)",
+      "team/treasury wallets",
+      "market_maker wallets",
+      "your_own_wallets (για anomalies)"
+    ],
+    "metrics": [
+      "large_transfers (> $100k ή custom threshold)",
+      "exchange_inflows/outflows (αθροιστικά 1h/4h/24h)",
+      "DEX_volume_spikes (vs 7d avg)",
+      "TVL_changes (για DeFi projects)",
+      "new_holders_24h",
+      "token_unlocks (calendar + on-chain execution)"
+    ],
+    "alert_logic_examples": [
+      "Αν exchange_inflow_4h > 3x 7d_avg και price ↓ → potential distribution → μείωσε sizing ή tightens stops.",
+      "Αν smart_money net_inflow_24h > threshold και price sideways → accumulation → candidate για entry.",
+      "Αν TVL ↓ 20% σε 48h χωρίς news → risk-off signal → avoid new longs."
+    ],
+    "tools": ["Dune dashboards", "Arkham alerts", "Nansen Smart Money", "DeFiLlama TVL alerts"]
+  },
+  "portfolio_allocation_by_cycle": {
+    "phases": {
+      "accumulation": {
+        "description": "Πλάγια/χαμηλή τιμή, χαμηλό sentiment",
+        "allocation_per_position_pct": [10, 15],
+        "num_positions": [3, 5],
+        "cash_stable_pct": [40, 60],
+        "leverage": "none ή πολύ χαμηλό"
+      },
+      "markup": {
+        "description": "Τάση ανοδική, breakouts, FOMO αρχίζει",
+        "allocation_per_position_pct": [5, 10],
+        "num_positions": [4, 7],
+        "cash_stable_pct": [20, 40],
+        "leverage": "μόνο σε high conviction, μικρό"
+      },
+      "distribution": {
+        "description": "Παράλογη αισιοδοξία, hyper-leverage, memecoins",
+        "allocation_per_position_pct": [2, 5],
+        "num_positions": [2, 4],
+        "cash_stable_pct": [50, 70],
+        "leverage": "avoid"
+      },
+      "markdown": {
+        "description": "Downtrend, liquidations, negative news flow",
+        "allocation_per_position_pct": [3, 5],
+        "num_positions": [2, 3],
+        "cash_stable_pct": [70, 90],
+        "leverage": "none"
+      }
+    },
+    "rules": [
+      "Μην αυξάνεις sizing πριν επιβεβαιωθεί φάση (price action + breadth + BTC dominance).",
+      "Κράτα stable buffer για flash crashes / ευκαιρίες panic.",
+      "Αναπροσαρμόζεις allocation κάθε 2–4 εβδομάδες βάσει δεδομένων, όχι συναισθήματος."
+    ]
+  }
+}
