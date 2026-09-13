@@ -1,54 +1,41 @@
-# Crypto Trading Bot
+# Crypto Research Dashboard
 
-Crypto trading skills engine: position sizing, news impact estimator, on-chain alerts, trade journal.
+A mobile-friendly research dashboard for market context, position sizing, tokenomics scenarios, news-impact calculations and early-token due diligence.
 
-## Features
+## What it does
 
-- **Position Size Calculator**: Calculate optimal position size based on risk % and stop loss
-- **News Impact Estimator**: Analyze news headlines and estimate price impact
-- **On-Chain Alerts**: Monitor wallet flows, DEX volume, TVL changes
-- **Trade Journal**: Log trades with R-multiples, PnL, discipline tracking
-- **Portfolio Allocation**: Adjust allocation based on market cycle phase
+- **Market reader:** evaluates a manual market-regime input through price change, relative volume and sentiment.
+- **Tokenomics engine:** BTC/ETH/SOL conditional scorecards using `Supply dynamics × demand × liquidity × expectations`.
+- **News-to-profit calculator:** classifies supply, utility, liquidity, trust or technology events; checks price move already made; adjusts risk and calculates an entry/stop/target scenario.
+- **Position sizing:** calculates planned loss, units, notional exposure and R multiple.
+- **Early-token due diligence:** checks contract verification, liquidity, holder concentration, team transparency, audit status, unlock risk, utility and community quality.
+- **Journal API:** stores manual trade records. Do not treat SQLite on a free web service as durable storage.
 
-## Quick Start
-
-### Local Development
+## Run locally
 
 ```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Set environment variables
-export OPENAI_API_KEY="your-key-here"
-export DUNE_API_KEY="your-key-here"
-export DATABASE_URL="sqlite:///./trading.db"
-
-# Run the server
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+python -m pip install -r requirements.txt
+python -m uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-### Deploy to Cloud
+## Render
 
-1. **Render**: Connect this repo, set build command `pip install -r requirements.txt`, start command `uvicorn main:app --host 0.0.0.0 --port $PORT`
-2. **Railway**: Connect repo, add environment variables, auto-deploy
+Build command:
 
-## API Endpoints
+```bash
+python -m pip install -r requirements.txt
+```
 
-- `GET /` - Health check
-- `POST /api/position-size` - Calculate position size
-- `POST /api/news-impact` - Estimate news impact
-- `POST /api/trade` - Log a trade
-- `GET /api/journal` - Get trade journal
-- `GET /api/alerts` - Get active alerts
-- `POST /api/alerts/configure` - Configure alert thresholds
+Start command:
 
-## Environment Variables
+```bash
+python -m uvicorn main:app --host 0.0.0.0 --port $PORT
+```
 
-- `OPENAI_API_KEY` - For LLM-based news analysis
-- `DUNE_API_KEY` - For on-chain data
-- `COINGECKO_API_KEY` - For news/market data (optional)
-- `DATABASE_URL` - Database connection string
+## Security
 
-## Skills Template
+Never add a seed phrase, private key, wallet password, exchange password or withdrawal-capable API key to this app, GitHub or Render. The application intentionally has no wallet connection and no trade-execution endpoint.
 
-See `skills_template.json` for the complete skills specification.
+## Data status
+
+Version 2 starts with manual inputs and deterministic calculations. Live market/news/on-chain feeds and background monitoring should be added only after persistent storage and source validation are configured.
